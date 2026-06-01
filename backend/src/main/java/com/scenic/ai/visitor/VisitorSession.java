@@ -65,4 +65,12 @@ public class VisitorSession {
     public String getDeviceType() {
         return deviceType;
     }
+
+    public ScenicArea getScenicArea() {
+        return scenicArea;
+    }
+
+    public void touch() {
+        this.lastActiveAt = OffsetDateTime.now();
+    }
 }

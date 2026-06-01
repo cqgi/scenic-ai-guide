@@ -45,6 +45,13 @@ app:
     max-top-n: ${RAG_MAX_TOP_N:10}
     min-keyword-score-for-fusion: ${RAG_MIN_KEYWORD_SCORE_FOR_FUSION:3.0}
     min-vector-score-for-fusion: ${RAG_MIN_VECTOR_SCORE_FOR_FUSION:0.18}
+  ai:
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:20}
+    tts-model: ${OPENAI_TTS_MODEL:tts-1}
+    tts-voice: ${OPENAI_TTS_VOICE:alloy}
+    asr-model: ${OPENAI_ASR_MODEL:whisper-1}
+    audio-storage-path: ${AI_AUDIO_STORAGE_PATH:target/generated-audio}
+    audio-public-path: ${AI_AUDIO_PUBLIC_PATH:/generated-audio}
 
 springdoc:
   swagger-ui:
