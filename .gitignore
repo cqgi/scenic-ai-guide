@@ -1,0 +1,27 @@
+# Documentation and planning notes
+docs/
+*.md
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+backend/target/
+*.class
+*.log
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.tsbuildinfo
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+
+# Runtime data
+*.pid

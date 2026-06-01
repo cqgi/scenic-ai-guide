@@ -1,0 +1,45 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: scenic-ai-guide
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/scenic_ai}
+    username: ${DB_USERNAME:scenic}
+    password: ${DB_PASSWORD:scenic_pass}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:dummy-key}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o-mini}
+      embedding:
+        options:
+          model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-development-secret-change-this-development-secret}
+    expires-in-minutes: ${JWT_EXPIRES_IN_MINUTES:1440}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
