@@ -1,0 +1,22 @@
+[
+  {"query": "红叶谷适合拍照吗", "interests": ["photo"], "expectation": "命中红叶谷讲解，非拒答"},
+  {"query": "枫叶谷秋天有什么看点", "interests": ["nature"], "expectation": "通过别名命中红叶谷"},
+  {"query": "明镜湖适合轻松散步吗", "interests": ["nature"], "expectation": "命中明镜湖或自然轻松路线"},
+  {"query": "镜湖在哪里适合拍什么", "interests": ["photo"], "expectation": "通过别名命中明镜湖"},
+  {"query": "古寺遗址讲什么历史", "interests": ["history"], "expectation": "命中古寺遗址讲解"},
+  {"query": "栖霞古寺和佛教文化有关吗", "interests": ["culture"], "expectation": "通过别名命中古寺遗址"},
+  {"query": "碑刻长廊适合喜欢书法的人吗", "interests": ["culture"], "expectation": "命中碑刻长廊讲解"},
+  {"query": "石刻长廊有什么人文内容", "interests": ["history"], "expectation": "通过别名命中碑刻长廊"},
+  {"query": "观景台适合作为路线终点吗", "interests": ["photo"], "expectation": "命中观景台或自然风光路线"},
+  {"query": "游客中心能提供哪些服务", "interests": ["service"], "expectation": "命中游客中心"},
+  {"query": "我想走自然风光和拍照路线", "interests": ["nature", "photo"], "expectation": "命中自然风光轻松线相关知识"},
+  {"query": "亲子家庭边走边学怎么安排", "interests": ["family"], "expectation": "命中亲子研学路线"},
+  {"query": "历史文化精讲线包含哪些点", "interests": ["history", "culture"], "expectation": "命中历史文化路线"},
+  {"query": "我对碑刻和古代建筑感兴趣", "interests": ["history"], "expectation": "命中碑刻长廊或古寺遗址"},
+  {"query": "景区哪里能看红叶和步道景观", "interests": ["nature"], "expectation": "命中红叶谷"},
+  {"query": "这里有没有适合休息咨询的地方", "interests": ["service"], "expectation": "命中游客中心"},
+  {"query": "今天红叶谷人多不多需要排队吗", "interests": ["photo"], "expectation": "实时信息证据不足，应拒答"},
+  {"query": "现在天气适合去观景台吗", "interests": ["photo"], "expectation": "实时天气证据不足，应拒答"},
+  {"query": "景区有没有海豚表演", "interests": [], "expectation": "知识库无证据，应拒答"},
+  {"query": "能介绍一下火星基地门票吗", "interests": [], "expectation": "知识库无证据，应拒答"}
+]
