@@ -5,9 +5,11 @@ import com.scenic.ai.rag.model.RetrievalCandidate;
 import com.scenic.ai.rag.model.RetrievalQuery;
 import com.scenic.ai.rag.repository.KnowledgeChunkRepository;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,19 @@ public class KeywordRetrievalService {
     public List<RetrievalCandidate> retrieve(RetrievalQuery query) {
         Set<String> terms = new LinkedHashSet<>(textProcessingService.tokenize(query.query()));
         terms.add(query.query().trim());
-        return knowledgeChunkRepository.findByEnabledTrue().stream()
+        Map<Long, KnowledgeChunk> preselected = new LinkedHashMap<>();
+        for (String term : terms) {
+            if (term.isBlank()) {
+                continue;
+            }
+            for (KnowledgeChunk chunk : knowledgeChunkRepository.findKeywordCandidates(term, query.topK() * 5)) {
+                preselected.putIfAbsent(chunk.getId(), chunk);
+            }
+            if (preselected.size() >= query.topK() * 10) {
+                break;
+            }
+        }
+        return preselected.values().stream()
                 .map(chunk -> score(chunk, terms, query))
                 .filter(candidate -> candidate.getKeywordScore() > 0)
                 .sorted(Comparator.comparingDouble(RetrievalCandidate::getKeywordScore).reversed())

@@ -43,7 +43,7 @@ public class Bm25RetrievalService {
         if (tokens.isEmpty()) {
             return rawQuery;
         }
-        return String.join(" | ", tokens);
+        return String.join(" ", tokens);
     }
 
     private double safeScore(Long chunkId, String query) {

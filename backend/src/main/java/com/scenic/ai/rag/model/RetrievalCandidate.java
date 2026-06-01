@@ -46,16 +46,32 @@ public class RetrievalCandidate {
         return chunkId;
     }
 
+    public void setChunkId(Long chunkId) {
+        this.chunkId = chunkId;
+    }
+
     public Long getDocumentId() {
         return documentId;
+    }
+
+    public void setDocumentId(Long documentId) {
+        this.documentId = documentId;
     }
 
     public String getTitle() {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getContent() {
         return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public String getSourceType() {

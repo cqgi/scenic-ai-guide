@@ -16,17 +16,32 @@ public interface KnowledgeChunkRepository extends JpaRepository<KnowledgeChunk, 
     List<KnowledgeChunk> findByIdIn(Collection<Long> ids);
 
     @Query(value = """
-            SELECT kc.*, ts_rank_cd(to_tsvector('simple', kc.search_text), to_tsquery('simple', :query)) AS rank
+            SELECT DISTINCT kc.*
             FROM knowledge_chunk kc
             WHERE kc.enabled = true
-              AND to_tsvector('simple', kc.search_text) @@ to_tsquery('simple', :query)
+              AND (
+                    kc.keywords ILIKE CONCAT('%', :term, '%')
+                 OR kc.aliases ILIKE CONCAT('%', :term, '%')
+                 OR kc.spot_names ILIKE CONCAT('%', :term, '%')
+                 OR kc.title ILIKE CONCAT('%', :term, '%')
+                 OR kc.search_text ILIKE CONCAT('%', :term, '%')
+              )
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<KnowledgeChunk> findKeywordCandidates(@Param("term") String term, @Param("limit") int limit);
+
+    @Query(value = """
+            SELECT kc.*, ts_rank_cd(to_tsvector('simple', kc.search_text), websearch_to_tsquery('simple', :query)) AS rank
+            FROM knowledge_chunk kc
+            WHERE kc.enabled = true
+              AND to_tsvector('simple', kc.search_text) @@ websearch_to_tsquery('simple', :query)
             ORDER BY rank DESC
             LIMIT :limit
             """, nativeQuery = true)
     List<KnowledgeChunk> searchByFullText(@Param("query") String query, @Param("limit") int limit);
 
     @Query(value = """
-            SELECT COALESCE(ts_rank_cd(to_tsvector('simple', kc.search_text), to_tsquery('simple', :query)), 0)
+            SELECT COALESCE(ts_rank_cd(to_tsvector('simple', kc.search_text), websearch_to_tsquery('simple', :query)), 0)
             FROM knowledge_chunk kc
             WHERE kc.id = :chunkId
             """, nativeQuery = true)

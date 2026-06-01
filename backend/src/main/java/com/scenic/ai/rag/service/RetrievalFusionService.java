@@ -1,5 +1,6 @@
 package com.scenic.ai.rag.service;
 
+import com.scenic.ai.rag.config.RagProperties;
 import com.scenic.ai.rag.model.RetrievalCandidate;
 import com.scenic.ai.rag.model.RetrievalQuery;
 import java.util.ArrayList;
@@ -18,6 +19,12 @@ public class RetrievalFusionService {
     private static final double VECTOR_WEIGHT = 0.30;
     private static final double METADATA_WEIGHT = 0.05;
 
+    private final RagProperties ragProperties;
+
+    public RetrievalFusionService(RagProperties ragProperties) {
+        this.ragProperties = ragProperties;
+    }
+
     public List<RetrievalCandidate> fuse(
             RetrievalQuery query,
             List<RetrievalCandidate> bm25Candidates,
@@ -30,16 +37,20 @@ public class RetrievalFusionService {
         merge(merged, vectorCandidates);
 
         double maxBm25 = max(merged.values().stream().mapToDouble(RetrievalCandidate::getBm25Score).toArray());
-        double maxKeyword = max(merged.values().stream().mapToDouble(RetrievalCandidate::getKeywordScore).toArray());
-        double maxVector = max(merged.values().stream().mapToDouble(RetrievalCandidate::getVectorScore).toArray());
+        double maxKeyword = max(merged.values().stream()
+                .mapToDouble(candidate -> candidate.getKeywordScore() >= ragProperties.minKeywordScoreForFusion() ? candidate.getKeywordScore() : 0)
+                .toArray());
+        double maxVector = max(merged.values().stream()
+                .mapToDouble(candidate -> candidate.getVectorScore() >= ragProperties.minVectorScoreForFusion() ? candidate.getVectorScore() : 0)
+                .toArray());
 
         for (RetrievalCandidate candidate : merged.values()) {
             double metadataBoost = metadataBoost(query, candidate);
             candidate.setMetadataBoost(metadataBoost);
             candidate.setFinalScore(
                     BM25_WEIGHT * normalize(candidate.getBm25Score(), maxBm25)
-                            + KEYWORD_WEIGHT * normalize(candidate.getKeywordScore(), maxKeyword)
-                            + VECTOR_WEIGHT * normalize(candidate.getVectorScore(), maxVector)
+                            + KEYWORD_WEIGHT * normalize(candidate.getKeywordScore(), maxKeyword, ragProperties.minKeywordScoreForFusion())
+                            + VECTOR_WEIGHT * normalize(candidate.getVectorScore(), maxVector, ragProperties.minVectorScoreForFusion())
                             + METADATA_WEIGHT * metadataBoost
             );
         }
@@ -97,6 +108,13 @@ public class RetrievalFusionService {
             return 0;
         }
         return Math.min(score / max, 1.0);
+    }
+
+    private double normalize(double score, double max, double floor) {
+        if (score < floor) {
+            return 0;
+        }
+        return normalize(score, max);
     }
 
     private double max(double[] values) {

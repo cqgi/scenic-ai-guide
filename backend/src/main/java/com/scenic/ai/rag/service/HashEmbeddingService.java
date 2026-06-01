@@ -3,14 +3,13 @@ package com.scenic.ai.rag.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class HashEmbeddingService implements EmbeddingService {
+@Component
+public class HashEmbeddingService {
 
     private static final int DIMENSION = 1536;
 
-    @Override
     public double[] embed(String text) {
         double[] vector = new double[DIMENSION];
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
