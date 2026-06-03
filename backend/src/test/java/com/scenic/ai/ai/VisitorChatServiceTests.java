@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.scenic.ai.interaction.InteractionLog;
 import com.scenic.ai.interaction.InteractionLogRepository;
+import com.scenic.ai.rag.model.RetrievalTrace;
 import com.scenic.ai.rag.model.RetrievalResult;
+import com.scenic.ai.rag.repository.RetrievalTraceRepository;
 import com.scenic.ai.rag.service.HybridRetrievalService;
 import com.scenic.ai.route.RouteRecommendationService;
 import com.scenic.ai.visitor.VisitorSession;
@@ -32,6 +34,7 @@ class VisitorChatServiceTests {
                 new EmotionAnalyzer(),
                 text -> new TextToSpeechClient.SynthesisResult(null, List.of(), false, "fallback"),
                 interactionRepository(logs),
+                retrievalTraceRepository(),
                 routeRecommendationService(),
                 transactionTemplate()
         );
@@ -57,6 +60,7 @@ class VisitorChatServiceTests {
                 new EmotionAnalyzer(),
                 text -> new TextToSpeechClient.SynthesisResult(null, List.of(), false, "fallback"),
                 interactionRepository(logs),
+                retrievalTraceRepository(),
                 routeRecommendationService(),
                 transactionTemplate()
         );
@@ -67,6 +71,31 @@ class VisitorChatServiceTests {
         assertThat(response.answer()).contains("推荐路线：自然风光轻松线");
         assertThat(response.sourceChunks()).isEmpty();
         assertThat(logs).hasSize(1);
+    }
+
+    @Test
+    void linksRetrievalTraceToSavedInteraction() {
+        List<InteractionLog> logs = new ArrayList<>();
+        RetrievalTrace trace = new RetrievalTrace("红叶谷适合拍照吗", "[]", "[]", "[]", "[]", true, "低置信");
+        VisitorChatService service = new VisitorChatService(
+                sessionRepository(),
+                new TraceRetrievalService(),
+                new RagContextAssembler(),
+                new IntentClassifier(),
+                new PromptService(),
+                new CapturingLlmClient(),
+                new EmotionAnalyzer(),
+                text -> new TextToSpeechClient.SynthesisResult(null, List.of(), false, "fallback"),
+                interactionRepository(logs),
+                retrievalTraceRepository(trace),
+                routeRecommendationService(),
+                transactionTemplate()
+        );
+
+        service.chatText(new VisitorChatService.ChatRequest("token", "红叶谷适合拍照吗", List.of("photo")));
+
+        assertThat(logs).hasSize(1);
+        assertThat(trace.getInteractionId()).isEqualTo(logs.get(0).getId());
     }
 
     private static class CapturingLlmClient implements LlmClient {
@@ -98,6 +127,17 @@ class VisitorChatServiceTests {
         @Override
         public RetrievalResult search(com.scenic.ai.rag.model.RetrievalQuery query) {
             throw new AssertionError("route intent should not call RAG search");
+        }
+    }
+
+    private static class TraceRetrievalService extends HybridRetrievalService {
+        TraceRetrievalService() {
+            super(null, null, null, null, null, null, null);
+        }
+
+        @Override
+        public RetrievalResult search(com.scenic.ai.rag.model.RetrievalQuery query) {
+            return new RetrievalResult(99L, query.query(), List.of(), List.of(), List.of(), List.of(), true, "低置信");
         }
     }
 
@@ -145,11 +185,43 @@ class VisitorChatServiceTests {
                 new Class<?>[]{InteractionLogRepository.class},
                 (proxy, method, args) -> {
                     if (method.getName().equals("save")) {
-                        saved.add((InteractionLog) args[0]);
+                        InteractionLog log = (InteractionLog) args[0];
+                        setId(log, (long) saved.size() + 1);
+                        saved.add(log);
+                        return log;
+                    }
+                    throw new UnsupportedOperationException(method.getName());
+                }
+        );
+    }
+
+    private RetrievalTraceRepository retrievalTraceRepository() {
+        return retrievalTraceRepository(null);
+    }
+
+    private RetrievalTraceRepository retrievalTraceRepository(RetrievalTrace trace) {
+        return (RetrievalTraceRepository) Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class<?>[]{RetrievalTraceRepository.class},
+                (proxy, method, args) -> {
+                    if (method.getName().equals("findById")) {
+                        return trace == null ? Optional.empty() : Optional.of(trace);
+                    }
+                    if (method.getName().equals("save")) {
                         return args[0];
                     }
                     throw new UnsupportedOperationException(method.getName());
                 }
         );
+    }
+
+    private void setId(InteractionLog log, Long id) {
+        try {
+            java.lang.reflect.Field field = InteractionLog.class.getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(log, id);
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError(exception);
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.scenic.ai.interaction.InteractionLog;
 import com.scenic.ai.interaction.InteractionLogRepository;
 import com.scenic.ai.rag.model.RetrievalQuery;
 import com.scenic.ai.rag.model.RetrievalResult;
+import com.scenic.ai.rag.repository.RetrievalTraceRepository;
 import com.scenic.ai.rag.service.HybridRetrievalService;
 import com.scenic.ai.route.RouteRecommendationService;
 import com.scenic.ai.visitor.VisitorSession;
@@ -24,6 +25,7 @@ public class VisitorChatService {
     private final EmotionAnalyzer emotionAnalyzer;
     private final TextToSpeechClient textToSpeechClient;
     private final InteractionLogRepository interactionLogRepository;
+    private final RetrievalTraceRepository retrievalTraceRepository;
     private final RouteRecommendationService routeRecommendationService;
     private final TransactionTemplate transactionTemplate;
 
@@ -37,6 +39,7 @@ public class VisitorChatService {
             EmotionAnalyzer emotionAnalyzer,
             TextToSpeechClient textToSpeechClient,
             InteractionLogRepository interactionLogRepository,
+            RetrievalTraceRepository retrievalTraceRepository,
             RouteRecommendationService routeRecommendationService,
             TransactionTemplate transactionTemplate
     ) {
@@ -49,6 +52,7 @@ public class VisitorChatService {
         this.emotionAnalyzer = emotionAnalyzer;
         this.textToSpeechClient = textToSpeechClient;
         this.interactionLogRepository = interactionLogRepository;
+        this.retrievalTraceRepository = retrievalTraceRepository;
         this.routeRecommendationService = routeRecommendationService;
         this.transactionTemplate = transactionTemplate;
     }
@@ -100,7 +104,8 @@ public class VisitorChatService {
         Emotion emotion = emotionAnalyzer.analyze(answer, rejected, fallback);
         TextToSpeechClient.SynthesisResult speech = textToSpeechClient.synthesize(answer);
         int latencyMs = Math.toIntExact(Math.min(System.currentTimeMillis() - start, Integer.MAX_VALUE));
-        InteractionLog log = saveInteraction(request, inputType, asrText, intent, answer, emotion, sourceChunks, latencyMs);
+        InteractionLog log = saveInteraction(request, inputType, asrText, intent, answer, emotion, sourceChunks, latencyMs,
+                retrieval.traceId());
         return new ChatResponse(
                 log.getId(),
                 intent.code(),
@@ -116,12 +121,13 @@ public class VisitorChatService {
 
     private InteractionLog saveInteraction(ChatRequest request, String inputType, String asrText, Intent intent,
                                            String answer, Emotion emotion,
-                                           List<RagContextAssembler.SourceChunk> sourceChunks, int latencyMs) {
+                                           List<RagContextAssembler.SourceChunk> sourceChunks, int latencyMs,
+                                           Long retrievalTraceId) {
         return transactionTemplate.execute(status -> {
             VisitorSession session = visitorSessionRepository.findBySessionToken(request.sessionToken())
                     .orElseThrow(() -> new IllegalArgumentException("游客 session 不存在或已过期"));
             session.touch();
-            return interactionLogRepository.save(new InteractionLog(
+            InteractionLog log = interactionLogRepository.save(new InteractionLog(
                     session,
                     inputType,
                     request.query(),
@@ -132,6 +138,13 @@ public class VisitorChatService {
                     ragContextAssembler.sourceChunkIds(sourceChunks),
                     latencyMs
             ));
+            if (retrievalTraceId != null) {
+                retrievalTraceRepository.findById(retrievalTraceId).ifPresent(trace -> {
+                    trace.setInteractionId(log.getId());
+                    retrievalTraceRepository.save(trace);
+                });
+            }
+            return log;
         });
     }
 

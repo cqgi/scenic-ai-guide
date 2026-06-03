@@ -3,17 +3,29 @@ package com.scenic.ai.rag.repository;
 import com.scenic.ai.rag.model.KnowledgeChunk;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface KnowledgeChunkRepository extends JpaRepository<KnowledgeChunk, Long> {
 
+    @EntityGraph(attributePaths = {"document", "scenicSpot"})
     List<KnowledgeChunk> findByDocumentIdOrderByIdAsc(Long documentId);
 
     List<KnowledgeChunk> findByEnabledTrue();
 
+    @EntityGraph(attributePaths = {"document", "scenicSpot"})
     List<KnowledgeChunk> findByIdIn(Collection<Long> ids);
+
+    @EntityGraph(attributePaths = {"document", "scenicSpot"})
+    @Query("SELECT chunk FROM KnowledgeChunk chunk WHERE chunk.id = :id")
+    Optional<KnowledgeChunk> findByIdWithDocumentAndScenicSpot(@Param("id") Long id);
+
+    long countByDocumentId(Long documentId);
+
+    long countByDocumentIdAndEnabledTrue(Long documentId);
 
     @Query(value = """
             SELECT DISTINCT kc.*

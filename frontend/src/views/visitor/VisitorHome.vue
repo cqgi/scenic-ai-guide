@@ -7,6 +7,8 @@
       :state="humanState"
       :emotion="currentEmotion"
       :scenic-name="scenicArea?.name ?? '景区导览'"
+      :human-name="digitalHuman.name"
+      :avatar-url="digitalHuman.avatarUrl"
       :mouth-open="mouthOpen"
     />
 
@@ -55,6 +57,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { fetchPublicDigitalHumanProfile, type DigitalHumanProfile } from '@/api/admin'
 import { fetchDefaultScenicArea, type ScenicArea } from '@/api/scenic'
 import {
   createVisitorSession,
@@ -73,6 +76,11 @@ import VisitorComposer from '@/components/visitor/VisitorComposer.vue'
 
 const defaultInterests = ['history', 'nature', 'photo']
 const scenicArea = ref<ScenicArea | null>(null)
+const digitalHuman = ref<Pick<DigitalHumanProfile, 'name' | 'avatarUrl' | 'welcomeText'>>({
+  name: '小栖',
+  avatarUrl: null,
+  welcomeText: '你好，我是你的景区 AI 导游小栖。可以问我景点讲解、拍照建议，也可以让我推荐路线。',
+})
 const session = ref<VisitorSession | null>(null)
 const messages = ref<VisitorMessage[]>([])
 const busy = ref(false)
@@ -115,12 +123,23 @@ onBeforeUnmount(() => {
 async function initialize() {
   humanState.value = 'thinking'
   try {
-    scenicArea.value = await fetchDefaultScenicArea()
+    const [area, profile] = await Promise.all([
+      fetchDefaultScenicArea(),
+      fetchPublicDigitalHumanProfile().catch(() => null),
+    ])
+    scenicArea.value = area
+    if (profile?.enabled) {
+      digitalHuman.value = {
+        name: profile.name,
+        avatarUrl: profile.avatarUrl,
+        welcomeText: profile.welcomeText,
+      }
+    }
     session.value = await createVisitorSession(scenicArea.value.id, defaultInterests, 'h5')
     messages.value.push({
       id: newId(),
       role: 'assistant',
-      content: `你好，我是你的景区 AI 导游小栖。可以问我景点讲解、拍照建议，也可以让我推荐路线。`,
+      content: digitalHuman.value.welcomeText,
       sources: [],
     })
     humanState.value = 'idle'

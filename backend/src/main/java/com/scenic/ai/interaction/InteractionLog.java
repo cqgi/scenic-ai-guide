@@ -77,8 +77,32 @@ public class InteractionLog {
         return userQuery;
     }
 
+    public String getInputType() {
+        return inputType;
+    }
+
+    public String getAsrText() {
+        return asrText;
+    }
+
+    public String getIntent() {
+        return intent;
+    }
+
     public String getAnswer() {
         return answer;
+    }
+
+    public String getEmotion() {
+        return emotion;
+    }
+
+    public String getSourceChunkIds() {
+        return sourceChunkIds;
+    }
+
+    public Integer getLatencyMs() {
+        return latencyMs;
     }
 
     public Integer getSatisfaction() {
@@ -87,5 +111,9 @@ public class InteractionLog {
 
     public void setSatisfaction(Integer satisfaction) {
         this.satisfaction = satisfaction;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
     }
 }

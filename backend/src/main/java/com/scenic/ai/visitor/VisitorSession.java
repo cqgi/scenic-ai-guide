@@ -70,6 +70,14 @@ public class VisitorSession {
         return scenicArea;
     }
 
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public OffsetDateTime getLastActiveAt() {
+        return lastActiveAt;
+    }
+
     public void touch() {
         this.lastActiveAt = OffsetDateTime.now();
     }

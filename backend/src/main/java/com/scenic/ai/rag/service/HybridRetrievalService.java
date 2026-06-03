@@ -47,7 +47,17 @@ public class HybridRetrievalService {
         List<RetrievalCandidate> vector = vectorRetrievalService.retrieve(query);
         List<RetrievalCandidate> finals = retrievalFusionService.fuse(query, bm25, keyword, vector);
         LowConfidenceGuard.Rejection rejection = lowConfidenceGuard.evaluate(query, finals);
-        RetrievalResult result = new RetrievalResult(
+        RetrievalTrace trace = retrievalTraceRepository.save(new RetrievalTrace(
+                query.query(),
+                toJson(bm25),
+                toJson(keyword),
+                toJson(vector),
+                toJson(finals),
+                rejection.rejected(),
+                rejection.reason()
+        ));
+        return new RetrievalResult(
+                trace.getId(),
                 query.query(),
                 bm25,
                 keyword,
@@ -56,16 +66,6 @@ public class HybridRetrievalService {
                 rejection.rejected(),
                 rejection.reason()
         );
-        retrievalTraceRepository.save(new RetrievalTrace(
-                query.query(),
-                toJson(bm25),
-                toJson(keyword),
-                toJson(vector),
-                toJson(finals),
-                result.rejected(),
-                result.rejectReason()
-        ));
-        return result;
     }
 
     private String toJson(List<RetrievalCandidate> candidates) {

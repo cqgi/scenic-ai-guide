@@ -144,4 +144,17 @@ public class KnowledgeChunk {
     public boolean isEnabled() {
         return enabled;
     }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        this.updatedAt = OffsetDateTime.now();
+    }
 }

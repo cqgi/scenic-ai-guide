@@ -2,14 +2,14 @@
   <section class="stage" :class="[`state-${state}`, `emotion-${emotion}`]">
     <div class="stage-copy">
       <p>{{ scenicName }}</p>
-      <h1>小栖</h1>
+      <h1>{{ humanName }}</h1>
       <span>{{ statusText }}</span>
     </div>
 
-    <div class="portal" aria-label="AI 数字人小栖">
+    <div class="portal" :aria-label="`AI 数字人${humanName}`">
       <span class="ring ring-one" />
       <span class="ring ring-two" />
-      <img class="guide" :src="xiaoqiImage" alt="AI 数字人小栖" />
+      <img class="guide" :src="avatarUrl || xiaoqiImage" :alt="`AI 数字人${humanName}`" />
       <span class="mouth" :style="{ transform: `translateX(-50%) scaleY(${mouthScale})` }" />
       <span class="base-light" />
     </div>
@@ -26,6 +26,8 @@ const props = defineProps<{
   state: DigitalHumanState
   emotion: string
   scenicName: string
+  humanName: string
+  avatarUrl?: string | null
   mouthOpen: number
 }>()
 

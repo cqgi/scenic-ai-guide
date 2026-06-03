@@ -63,4 +63,48 @@ public class RetrievalTrace {
         this.rejectReason = rejectReason;
         this.createdAt = OffsetDateTime.now();
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getInteractionId() {
+        return interactionId;
+    }
+
+    public void setInteractionId(Long interactionId) {
+        this.interactionId = interactionId;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public String getBm25Candidates() {
+        return bm25Candidates;
+    }
+
+    public String getKeywordCandidates() {
+        return keywordCandidates;
+    }
+
+    public String getVectorCandidates() {
+        return vectorCandidates;
+    }
+
+    public String getFinalCandidates() {
+        return finalCandidates;
+    }
+
+    public boolean isRejected() {
+        return rejected;
+    }
+
+    public String getRejectReason() {
+        return rejectReason;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

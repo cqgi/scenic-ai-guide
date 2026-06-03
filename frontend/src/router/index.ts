@@ -5,6 +5,7 @@ import AdminLogin from '@/views/admin/AdminLogin.vue'
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import KnowledgePage from '@/views/admin/KnowledgePage.vue'
 import InteractionsPage from '@/views/admin/InteractionsPage.vue'
+import DigitalHumanPage from '@/views/admin/DigitalHumanPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +20,7 @@ const router = createRouter({
         { path: '', redirect: '/admin/dashboard' },
         { path: 'dashboard', component: AdminDashboard },
         { path: 'knowledge', component: KnowledgePage },
+        { path: 'digital-human', component: DigitalHumanPage },
         { path: 'interactions', component: InteractionsPage },
       ],
     },

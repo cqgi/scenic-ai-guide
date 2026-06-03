@@ -80,7 +80,32 @@ public class KnowledgeDocument {
         return docType;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public AdminUser getCreatedBy() {
+        return createdBy;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+        this.updatedAt = OffsetDateTime.now();
     }
 }

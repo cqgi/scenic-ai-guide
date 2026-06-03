@@ -46,4 +46,24 @@ public class Feedback {
     public Long getId() {
         return id;
     }
+
+    public InteractionLog getInteraction() {
+        return interaction;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public String getSentiment() {
+        return sentiment;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

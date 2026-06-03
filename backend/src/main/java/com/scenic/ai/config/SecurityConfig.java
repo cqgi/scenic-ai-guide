@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/auth/login").permitAll()
-                        .requestMatchers("/visitor/**", "/scenic-areas/**").permitAll()
+                        .requestMatchers("/visitor/**", "/scenic-areas/**", "/digital-human/**").permitAll()
                         .requestMatchers("/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )
